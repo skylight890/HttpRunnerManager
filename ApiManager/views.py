@@ -154,6 +154,25 @@ def add_case(request):
     else:
         return HttpResponseRedirect("/api/login/")
 
+def add_case_hikcentral(request):
+    if request.session.get('login_status'):
+        if request.is_ajax():
+            try:
+                testcase_info = json.loads(request.body.decode('utf-8'))
+            except ValueError:
+                logger.error('用例信息解析异常：{testcase_info}'.format(testcase_info=testcase_info))
+                return '用例信息解析异常'
+            msg = case_info_logic(**testcase_info)
+            return HttpResponse(get_ajax_msg(msg, '用例添加成功'))
+        elif request.method == 'GET':
+            manage_info = {
+                'account': request.session["now_account"],
+                'project': ProjectInfo.objects.all().values('project_name').order_by('-create_time')
+            }
+            return render_to_response('add_xml_case.html', manage_info)
+    else:
+        return HttpResponseRedirect("/api/login/")
+
 
 '''添加配置'''
 

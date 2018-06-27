@@ -79,9 +79,9 @@ WSGI_APPLICATION = 'HttpRunnerManager.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'HttpRunner',
+        'NAME': 'HttpRunner2.0',
         'USER': 'root',
-        'PASSWORD': 'lcc123456',
+        'PASSWORD': '12345',
         'HOST': '127.0.0.1',
         'PORT': '3306',
     }
@@ -136,7 +136,7 @@ SESSION_COOKIE_AGE = 30 * 60
 djcelery.setup_loader()
 CELERY_ENABLE_UTC = True
 CELERY_TIMEZONE = 'Asia/Shanghai'
-BROKER_URL = 'amqp://guest:guest@127.0.0.1:5672//'
+BROKER_URL = 'amqp://guest:guest@localhost:5672//'
 CELERYBEAT_SCHEDULER = 'djcelery.schedulers.DatabaseScheduler'
 CELERY_RESULT_BACKEND = 'djcelery.backends.database:DatabaseBackend'
 CELERY_ACCEPT_CONTENT = ['application/json']

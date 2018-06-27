@@ -1572,3 +1572,60 @@ Traceback (most recent call last):
   File "D:\HttpRunnerManager\ApiManager\utils\pagination.py", line 140, in get_pager_info
     return page_list, info, sum
 UnboundLocalError: local variable 'info' referenced before assignment
+2018-05-18 19:27:53,484 [HttpRunnerManager:26] [operation:add_register_data] [INFO]- 新增用户：ApiManager.UserInfo.objects
+2018-05-18 19:28:00,621 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 登录成功
+2018-05-18 19:32:39,543 [HttpRunnerManager:48] [operation:add_project_data] [INFO]- 项目添加成功：{'simple_desc': '', 'publish_app': 'VSM', 'other_desc': '', 'responsible_name': '胡巍', 'project_name': 'HikCentral V1.3', 'test_user': '胡巍', 'dev_user': 'Devloper'}
+2018-05-18 19:33:32,987 [HttpRunnerManager:90] [operation:add_module_data] [INFO]- 模块添加成功：{'belong_project': <ProjectInfo: ProjectInfo object (1)>, 'simple_desc': '自定义分割的用例', 'module_name': '自定义分割', 'other_desc': '', 'test_user': '胡巍'}
+2018-05-18 19:38:36,512 [HttpRunnerManager:131] [operation:add_case_data] [INFO]- 添加自定义分割用例添加成功
+2018-05-18 19:40:32,564 [django.request:93] [base:get_response] [WARNING]- Not Found: /api/
+2018-05-19 09:28:34,878 [HttpRunnerManager:35] [views:login] [INFO]- huwei 登录失败, 请检查用户名或者密码
+2018-05-19 09:28:39,620 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 登录成功
+2018-05-19 10:19:25,527 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 登录成功
+2018-05-19 11:04:27,492 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 登录成功
+2018-05-19 11:07:24,216 [HttpRunnerManager:131] [operation:add_case_data] [INFO]- CustomSplit用例添加成功
+2018-06-19 11:42:12,691 [django.request:93] [base:get_response] [WARNING]- Not Found: /
+2018-06-19 11:42:23,757 [django.request:93] [base:get_response] [WARNING]- Not Found: /register
+2018-06-19 11:43:43,826 [django.request:93] [base:get_response] [WARNING]- Not Found: /login
+2018-06-19 11:44:12,584 [django.request:93] [base:get_response] [WARNING]- Not Found: /ApiManager
+2018-06-19 11:44:35,628 [django.request:93] [base:get_response] [WARNING]- Not Found: /register
+2018-06-19 11:44:44,587 [django.request:93] [base:get_response] [WARNING]- Not Found: /login
+2018-06-19 11:48:04,126 [django.request:93] [base:get_response] [WARNING]- Not Found: /login
+2018-06-19 11:48:21,511 [django.request:93] [base:get_response] [WARNING]- Not Found: /register
+2018-06-19 11:50:03,360 [django.request:93] [base:get_response] [WARNING]- Not Found: /api
+2018-06-19 11:50:07,575 [django.request:93] [base:get_response] [WARNING]- Not Found: /login
+2018-06-19 13:42:30,201 [django.request:93] [base:get_response] [WARNING]- Not Found: /login
+2018-06-19 13:43:38,007 [django.request:93] [base:get_response] [WARNING]- Not Found: /login
+2018-06-19 13:50:45,199 [django.request:93] [base:get_response] [WARNING]- Not Found: /api
+2018-06-19 14:01:08,214 [HttpRunnerManager:35] [views:login] [INFO]- huwei 登录失败, 请检查用户名或者密码
+2018-06-19 14:01:13,658 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 登录成功
+2018-06-21 16:33:05,374 [HttpRunnerManager:35] [views:login] [INFO]- huwei 登录失败, 请检查用户名或者密码
+2018-06-21 16:33:09,475 [HttpRunnerManager:35] [views:login] [INFO]- huwei 登录失败, 请检查用户名或者密码
+2018-06-21 16:33:12,627 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 登录成功
+2018-06-22 11:27:34,838 [HttpRunnerManager:35] [views:login] [INFO]- huwei 登录失败, 请检查用户名或者密码
+2018-06-22 11:27:37,847 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 登录成功
+2018-06-22 14:30:19,988 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 登录成功
+2018-06-25 14:58:08,345 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 登录成功
+2018-06-26 15:54:58,140 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 登录成功
+2018-06-26 16:37:07,969 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 登录成功
+2018-06-27 09:49:59,420 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 登录成功
+2018-06-27 10:31:14,052 [HttpRunnerManager:48] [operation:add_project_data] [INFO]- 项目添加成功：{'project_name': 'ProjectTest', 'publish_app': 'fefe', 'test_user': 'fewww', 'simple_desc': 'fwef', 'dev_user': 'fewfei', 'responsible_name': 'feee', 'other_desc': 'fewfe'}
+2018-06-27 11:04:01,215 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 登录成功
+2018-06-27 11:46:09,674 [django.request:118] [exception:handle_uncaught_exception] [ERROR]- Internal Server Error: /api/run_test/
+Traceback (most recent call last):
+  File "D:\Script\HttpRunnerManager-master\venv3.5\lib\site-packages\django\core\handlers\exception.py", line 35, in inner
+    response = get_response(request)
+  File "D:\Script\HttpRunnerManager-master\venv3.5\lib\site-packages\django\core\handlers\base.py", line 128, in _get_response
+    response = self.process_exception_by_middleware(e, request)
+  File "D:\Script\HttpRunnerManager-master\venv3.5\lib\site-packages\django\core\handlers\base.py", line 126, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+  File "D:/Script/HttpRunnerManager/HttpRunnerManager\HttpRunnerManager\activator.py", line 19, in process
+    result = fun(request, index) if index else fun(request)
+  File "D:/Script/HttpRunnerManager/HttpRunnerManager\ApiManager\views.py", line 231, in run_test
+    testcases_dict = run_by_single(id, base_url)
+  File "D:/Script/HttpRunnerManager/HttpRunnerManager\ApiManager\utils\runner.py", line 20, in run_by_single
+    obj = TestCaseInfo.objects.get(id=index)
+  File "D:\Script\HttpRunnerManager-master\venv3.5\lib\site-packages\django\db\models\manager.py", line 82, in manager_method
+    return getattr(self.get_queryset(), name)(*args, **kwargs)
+  File "D:\Script\HttpRunnerManager-master\venv3.5\lib\site-packages\django\db\models\query.py", line 403, in get
+    self.model._meta.object_name
+ApiManager.models.DoesNotExist: TestCaseInfo matching query does not exist.

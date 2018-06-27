@@ -9,22 +9,22 @@
 
         <div class="listbiaoti am-cf">
             <ul class="am-icon-flag on"> 用例编辑</ul>
-            <dl class="am-icon-home" style="float: right;">当前位置： 用例管理 > <a href="#">新增用例</a></dl>
+            <dl class="am-icon-home" style="float: right;">当前位置： 用例管理 > <a href="#">新增HikCentral用例</a></dl>
         </div>
 
         <div class="am-tabs am-margin">
             <ul class="am-tabs-nav am-nav am-nav-tabs" id="tab-test">
-                <li><a href="javascript:;" data-target="#tab1">messages</a></li>
-                <li><a href="javascript:;" data-target="#tab2">variables/parameters</a></li>
-                <li><a href="javascript:;" data-target="#tab3">request</a></li>
-                <li><a href="javascript:;" data-target="#tab4">extract/validate</a></li>
+                <li><a href="javascript:;" data-target="#tab1">用例信息</a></li>
+                <li><a href="javascript:;" data-target="#tab2">变量/参数</a></li>
+                <li><a href="javascript:;" data-target="#tab3">请求数据</a></li>
+                <li><a href="javascript:;" data-target="#tab4">响应数据/断言</a></li>
             </ul>
 
             <div class="am-tabs-bd">
                 <div class="am-tab-panel" id="tab1">
                     <form class="form-horizontal" id="form_message">
                         <div class="form-group has-feedback has-info">
-                            <label for="case_name" class="col-md-2 control-label text-info" style="font-size: 14px;">name:</label>
+                            <label for="case_name" class="col-md-2 control-label text-info" style="font-size: 14px;">用例名称:</label>
                             <div class="col-md-4">
                                 <input type="text" class="form-control" id="case_name" placeholder="用例名称"
                                        name="case_name"
@@ -35,7 +35,7 @@
                         </div>
 
                         <div class="form-group has-success">
-                            <label for="project" class="col-md-2 control-label text-info" style="font-size: 14px;">project:</label>
+                            <label for="project" class="col-md-2 control-label text-info" style="font-size: 14px;">所属项目:</label>
                             <div class="col-md-4">
                                 <select name="project" class="form-control"
                                         onchange=info_ajax("#form_message","/api/add_case/")>
@@ -48,7 +48,7 @@
                         </div>
 
                         <div class="form-group has-success">
-                            <label for="module" class="col-md-2 control-label text-info" style="font-size: 14px;">module:</label>
+                            <label for="module" class="col-md-2 control-label text-info" style="font-size: 14px;">所属模块:</label>
                             <div class="col-md-4">
                                 <select id="belong_module_id" name="module" class="form-control">
                                 </select>
@@ -70,7 +70,7 @@
 
                         <div class="form-group has-feedback has-info">
                             <label for="author" class="col-md-2 control-label text-info"
-                                   style="font-size: 14px;">author:</label>
+                                   style="font-size: 14px;">作者:</label>
                             <div class="col-md-4">
                                 <input type="text" class="form-control" id="dev_name" placeholder="创建者" name="author"
                                        value="{{ account }}">
@@ -80,14 +80,14 @@
                     </form>
                 </div>
                 <div class="am-tab-panel" id="tab2">
-                    <button class="btn btn-info" value="添 加" onclick="add_row('variables')">add variables</button>
-                    <button class="btn btn-danger" value="删 除" onclick="del_row('variables')">del variables</button>
-                    <button class="btn btn-info" value="添 加" onclick="add_params('params')">add param</button>
-                    <button class="btn btn-danger" value="删 除" onclick="del_row('params')">del param</button>
+                    <button class="btn btn-info" value="添 加" onclick="add_row('variables')">添加变量</button>
+                    <button class="btn btn-danger" value="删 除" onclick="del_row('variables')">删除变量</button>
+                    <button class="btn btn-info" value="添 加" onclick="add_params('params')">添加参数</button>
+                    <button class="btn btn-danger" value="删 除" onclick="del_row('params')">删除参数</button>
 
                     <form id="form_variables">
                         <table class="table table-hover table-condensed table-bordered table-striped" id="variables">
-                            <caption>Variables:</caption>
+                            <caption>变量:</caption>
                             <thead>
                             <tr class="active text-success">
                                 <th width="5%" align="center">Option</th>
@@ -103,7 +103,7 @@
 
                     <form id="form_params">
                         <table class="table table-hover table-condensed table-bordered table-striped" id="params">
-                            <caption>parameters:</caption>
+                            <caption>参数:</caption>
                             <thead>
                             <tr class="active text-success">
                                 <th width="5%" align="center">Option</th>
@@ -150,9 +150,9 @@
                             </div>
                         </div>
 
-                        <button class="btn btn-info" value="添 加" id="add_data" onclick="add_row('data')">add data
+                        <button class="btn btn-info" value="添 加" id="add_data" onclick="add_row('data')">添加数据
                         </button>
-                        <button class="btn btn-danger" value="删 除" id="del_data" onclick="del_row('data')">del data
+                        <button class="btn btn-danger" value="删 除" id="del_data" onclick="del_row('data')">删除数据
                         </button>
                         <button class="btn btn-info" value="添 加" onclick="add_row('header')">add headers</button>
                         <button class="btn btn-danger" value="删 除" onclick="del_row('header')">del headers</button>
@@ -160,7 +160,7 @@
 
                         <form id="form_request_data">
                             <table class="table table-hover table-condensed table-bordered table-striped" id="data">
-                                <caption>data:</caption>
+                                <caption>请求数据:</caption>
                                 <thead>
                                 <tr class="active text-success">
                                     <th width="5%" align="center">Option</th>
@@ -199,7 +199,7 @@
                     <button class="btn btn-danger" value="删 除" onclick="del_row('validate')">del validate</button>
                     <form id="form_extract">
                         <table class="table table-hover table-condensed table-bordered table-striped" id="extract">
-                            <caption>extract:</caption>
+                            <caption>提取响应数据:</caption>
                             <thead>
                             <tr class="active text-success">
                                 <th width="5%" align="center">Option</th>
@@ -214,7 +214,7 @@
 
                     <form id="form_validate">
                         <table class="table table-hover table-condensed table-bordered table-striped" id="validate">
-                            <caption>validate:</caption>
+                            <caption>结果验证:</caption>
                             <thead>
                             <tr class="active text-success">
                                 <th width="2%" align="center">Option</th>
