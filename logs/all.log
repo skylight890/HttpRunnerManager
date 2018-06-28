@@ -1865,3 +1865,17 @@
 2018-06-27 11:46:09,843 [django.server:124] [basehttp:log_message] [ERROR]- "GET /api/run_test/ HTTP/1.1" 500 94242
 2018-06-27 11:46:17,581 [django.server:124] [basehttp:log_message] [INFO]- "GET /api/index/ HTTP/1.1" 200 7852
 2018-06-27 11:48:50,170 [django.server:124] [basehttp:log_message] [INFO]- "GET /api/test_list/1/ HTTP/1.1" 200 18331
+2018-06-27 14:22:12,681 [django.server:124] [basehttp:log_message] [INFO]- "GET /api/add_config/ HTTP/1.1" 302 0
+2018-06-27 14:22:12,693 [django.server:124] [basehttp:log_message] [INFO]- "GET /api/login/ HTTP/1.1" 200 5469
+2018-06-27 14:22:17,657 [django.server:124] [basehttp:log_message] [INFO]- "POST /api/login/ HTTP/1.1" 302 0
+2018-06-27 14:22:17,721 [django.server:124] [basehttp:log_message] [INFO]- "GET /api/index/ HTTP/1.1" 200 7852
+2018-06-27 14:22:21,747 [django.server:124] [basehttp:log_message] [INFO]- "GET /api/add_config/ HTTP/1.1" 200 19526
+2018-06-27 14:46:46,280 [django.server:124] [basehttp:log_message] [INFO]- "GET /api/add_case_hikcentral/ HTTP/1.1" 200 23483
+2018-06-27 14:49:32,332 [django.server:124] [basehttp:log_message] [INFO]- "GET /api/add_case_hikcentral/ HTTP/1.1" 200 23483
+2018-06-27 14:49:38,393 [django.server:124] [basehttp:log_message] [INFO]- "GET /api/test_list/1/ HTTP/1.1" 200 18331
+2018-06-27 14:49:42,731 [django.server:124] [basehttp:log_message] [INFO]- "GET /api/add_case_hikcentral/ HTTP/1.1" 200 23483
+2018-06-27 14:49:55,582 [django.server:124] [basehttp:log_message] [INFO]- "POST /api/add_case/ HTTP/1.1" 200 15
+2018-06-27 14:50:21,151 [django.server:124] [basehttp:log_message] [INFO]- "GET /api/config_list/1/ HTTP/1.1" 200 11459
+2018-06-27 14:50:22,735 [django.server:124] [basehttp:log_message] [INFO]- "GET /api/add_config/ HTTP/1.1" 200 19526
+2018-06-27 14:52:52,942 [django.server:124] [basehttp:log_message] [INFO]- "GET /api/add_case_hikcentral/ HTTP/1.1" 200 23483
+2018-06-27 14:53:04,431 [django.server:124] [basehttp:log_message] [INFO]- "POST /api/add_case/ HTTP/1.1" 200 15

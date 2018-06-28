@@ -1629,3 +1629,4 @@ Traceback (most recent call last):
   File "D:\Script\HttpRunnerManager-master\venv3.5\lib\site-packages\django\db\models\query.py", line 403, in get
     self.model._meta.object_name
 ApiManager.models.DoesNotExist: TestCaseInfo matching query does not exist.
+2018-06-27 14:22:17,616 [HttpRunnerManager:30] [views:login] [INFO]- huwei3 µÇÂ¼³É¹¦
