@@ -1,8 +1,15 @@
+import datetime
+import io
+import json
 import logging
+import os
+from json import JSONDecodeError
 
+import yaml
+from django.db.models import Sum
 from djcelery.models import PeriodicTask
 
-from ApiManager.models import ModuleInfo
+from ApiManager.models import ModuleInfo, TestCaseInfo, TestReports
 from ApiManager.utils.operation import add_project_data, add_module_data, add_case_data, add_config_data, \
     add_register_data
 from ApiManager.utils.task_opt import create_task
@@ -11,66 +18,91 @@ logger = logging.getLogger('HttpRunnerManager')
 
 
 def type_change(type, value):
+    """
+    数据类型转换
+    :param type: str: 类型
+    :param value: object: 待转换的值
+    :return: ok or error
+    """
     try:
-        if type == 'string':
-            value = str(value)
-        elif type == 'float':
+        if type == 'float':
             value = float(value)
         elif type == 'int':
             value = int(value)
     except ValueError:
         logger.error('{value}转换{type}失败'.format(value=value, type=type))
-        return 'error'
+        return 'exception'
     if type == 'boolean':
         if value == 'False':
             value = False
         elif value == 'True':
             value = True
         else:
-            return 'error'
+            return 'exception'
     return value
 
 
 def key_value_list(keyword, **kwargs):
+    """
+    dict change to list
+    :param keyword: str: 关键字标识
+    :param kwargs: dict: 待转换的字典
+    :return: ok or tips
+    """
     if not isinstance(kwargs, dict) or not kwargs:
         return None
     else:
         lists = []
         test = kwargs.pop('test')
         for value in test:
-            key = value.pop('key')
-            val = value.pop('value')
-            if 'type' in value.keys():
-                type = value.pop('type')
+            if keyword == 'setup_hooks':
+                if value.get('key') != '':
+                    lists.append(value.get('key'))
+            elif keyword == 'teardown_hooks':
+                if value.get('value') != '':
+                    lists.append(value.get('value'))
             else:
-                type = 'str'
-            tips = '{keyword}: {val}格式错误,不是{type}类型'.format(keyword=keyword, val=val, type=type)
-            if key != '' and val != '':
-                if keyword == 'validate':
-                    value['check'] = key
-                    msg = type_change(type, val)
-                    if msg == 'error':
-                        return tips
-                    value['expected'] = msg
-                elif keyword == 'extract':
-                    value[key] = val
-                elif keyword == 'variables':
-                    msg = type_change(type, val)
-                    if msg == 'error':
-                        return tips
-                    value[key] = msg
-                elif keyword == 'parameters':
-                    try:
-                        value[key] = eval(val)
-                    except Exception:
-                        logging.error('{val}->eval 异常'.format(val=val))
-                        return '{keyword}: {val}格式错误'.format(keyword=keyword, val=val)
+                key = value.pop('key')
+                val = value.pop('value')
+                if 'type' in value.keys():
+                    type = value.pop('type')
+                else:
+                    type = 'str'
+                tips = '{keyword}: {val}格式错误,不是{type}类型'.format(keyword=keyword, val=val, type=type)
+                if key != '':
+                    if keyword == 'validate':
+                        value['check'] = key
+                        msg = type_change(type, val)
+                        if msg == 'exception':
+                            return tips
+                        value['expected'] = msg
+                    elif keyword == 'extract':
+                        value[key] = val
+                    elif keyword == 'variables':
+                        msg = type_change(type, val)
+                        if msg == 'exception':
+                            return tips
+                        value[key] = msg
+                    elif keyword == 'parameters':
+                        try:
+                            if not isinstance(eval(val), list):
+                                return '{keyword}: {val}格式错误'.format(keyword=keyword, val=val)
+                            value[key] = eval(val)
+                        except Exception:
+                            logging.error('{val}->eval 异常'.format(val=val))
+                            return '{keyword}: {val}格式错误'.format(keyword=keyword, val=val)
 
                 lists.append(value)
         return lists
 
 
 def key_value_dict(keyword, **kwargs):
+    """
+    字典二次处理
+    :param keyword: str: 关键字标识
+    :param kwargs: dict: 原字典值
+    :return: ok or tips
+    """
     if not isinstance(kwargs, dict) or not kwargs:
         return None
     else:
@@ -84,48 +116,76 @@ def key_value_dict(keyword, **kwargs):
             else:
                 type = 'str'
 
-            if key != '' and val != '':
+            if key != '':
                 if keyword == 'headers':
                     value[key] = val
                 elif keyword == 'data':
                     msg = type_change(type, val)
-                    if msg == 'error':
+                    if msg == 'exception':
                         return '{keyword}: {val}格式错误,不是{type}类型'.format(keyword=keyword, val=val, type=type)
                     value[key] = msg
                 dicts.update(value)
         return dicts
 
 
-'''动态加载模块'''
-
-
 def load_modules(**kwargs):
+    """
+    加载对应项目的模块信息，用户前端ajax请求返回
+    :param kwargs:  dict：项目相关信息
+    :return: str: module_info
+    """
     belong_project = kwargs.get('name').get('project')
-    module_info = list(ModuleInfo.objects.get_module_info(belong_project))
+    module_info = ModuleInfo.objects.filter(belong_project__project_name=belong_project) \
+        .values_list('id', 'module_name').order_by('-create_time')
+    module_info = list(module_info)
     string = ''
     for value in module_info:
-        string = string + value + 'replaceFlag'
-
+        string = string + str(value[0]) + '^=' + value[1] + 'replaceFlag'
     return string[:len(string) - 11]
 
 
-'''模块信息逻辑及落地'''
+def load_cases(type=1, **kwargs):
+    """
+    加载指定项目模块下的用例
+    :param kwargs: dict: 项目与模块信息
+    :return: str: 用例信息
+    """
+    belong_project = kwargs.get('name').get('project')
+    module = kwargs.get('name').get('module')
+    if module == '请选择':
+        return ''
+    case_info = TestCaseInfo.objects.filter(belong_project=belong_project, belong_module=module, type=type). \
+            values_list('id', 'name').order_by('-create_time')
+    case_info = list(case_info)
+    string = ''
+    for value in case_info:
+        string = string + str(value[0]) + '^=' + value[1] + 'replaceFlag'
+    return string[:len(string) - 11]
 
 
 def module_info_logic(type=True, **kwargs):
+    """
+    模块信息逻辑处理
+    :param type: boolean: True:默认新增模块
+    :param kwargs: dict: 模块信息
+    :return:
+    """
     if kwargs.get('module_name') is '':
         return '模块名称不能为空'
-    if kwargs.get('belong_project') is '':
-        return '请先添加项目'
+    if kwargs.get('belong_project') == '请选择':
+        return '请选择项目，没有请先添加哦'
     if kwargs.get('test_user') is '':
         return '测试人员不能为空'
     return add_module_data(type, **kwargs)
 
 
-'''项目信息逻辑及落地'''
-
-
 def project_info_logic(type=True, **kwargs):
+    """
+    项目信息逻辑处理
+    :param type: boolean:True 默认新增项目
+    :param kwargs: dict: 项目信息
+    :return:
+    """
     if kwargs.get('project_name') is '':
         return '项目名称不能为空'
     if kwargs.get('responsible_name') is '':
@@ -140,28 +200,38 @@ def project_info_logic(type=True, **kwargs):
     return add_project_data(type, **kwargs)
 
 
-'''用例信息逻辑及落地'''
-
-
 def case_info_logic(type=True, **kwargs):
+    """
+    用例信息逻辑处理以数据处理
+    :param type: boolean: True 默认新增用例信息， False: 更新用例
+    :param kwargs: dict: 用例信息
+    :return: str: ok or tips
+    """
     test = kwargs.pop('test')
     '''
         动态展示模块
     '''
     if 'request' not in test.keys():
-        return load_modules(**test)
+        type = test.pop('type')
+        if type == 'module':
+            return load_modules(**test)
+        elif type == 'case':
+            return load_cases(**test)
+        else:
+            return load_cases(type=2, **test)
+
     else:
         logging.info('用例原始信息: {kwargs}'.format(kwargs=kwargs))
         if test.get('name').get('case_name') is '':
             return '用例名称不可为空'
-        if test.get('name').get('project') is None or test.get('name').get('project') is '':
+        if test.get('name').get('module') == '请选择':
+            return '请选择或者添加模块'
+        if test.get('name').get('project') == '请选择':
+            return '请选择项目'
+        if test.get('name').get('project') == '':
             return '请先添加项目'
-        if test.get('name').get('module') is None or test.get('name').get('module') is '':
-            return '请先添加模块'
-        if test.get('name').get('author') is '':
-            return '创建者不能为空'
-        if test.get('request').get('url') is '':
-            return '接口地址不能为空'
+        if test.get('name').get('module') == '':
+            return '请添加模块'
 
         name = test.pop('name')
         test.setdefault('name', name.pop('case_name'))
@@ -208,14 +278,30 @@ def case_info_logic(type=True, **kwargs):
                 return params_list
             test.setdefault('parameters', params_list)
 
+        hooks = test.pop('hooks')
+        if hooks:
+
+            setup_hooks_list = key_value_list('setup_hooks', **hooks)
+            if not isinstance(setup_hooks_list, list):
+                return setup_hooks_list
+            test.setdefault('setup_hooks', setup_hooks_list)
+
+            teardown_hooks_list = key_value_list('teardown_hooks', **hooks)
+            if not isinstance(teardown_hooks_list, list):
+                return teardown_hooks_list
+            test.setdefault('teardown_hooks', teardown_hooks_list)
+
         kwargs.setdefault('test', test)
         return add_case_data(type, **kwargs)
 
 
-'''模块信息逻辑及落地'''
-
-
 def config_info_logic(type=True, **kwargs):
+    """
+    模块信息逻辑处理及数据处理
+    :param type: boolean: True 默认新增 False：更新数据
+    :param kwargs: dict: 模块信息
+    :return: ok or tips
+    """
     config = kwargs.pop('config')
     '''
         动态展示模块
@@ -226,12 +312,16 @@ def config_info_logic(type=True, **kwargs):
         logging.debug('配置原始信息: {kwargs}'.format(kwargs=kwargs))
         if config.get('name').get('config_name') is '':
             return '配置名称不可为空'
-        if config.get('name').get('project') is None or config.get('name').get('project') is '':
-            return '请先添加项目'
-        if config.get('name').get('config_module') is None or config.get('name').get('config_module') is '':
-            return '请先添加模块'
-        if config.get('name').get('config_author') is '':
+        if config.get('name').get('author') is '':
             return '创建者不能为空'
+        if config.get('name').get('project') == '请选择':
+            return '请选择项目'
+        if config.get('name').get('module') == '请选择':
+            return '请选择或者添加模块'
+        if config.get('name').get('project') == '':
+            return '请先添加项目'
+        if config.get('name').get('module') == '':
+            return '请添加模块'
 
         name = config.pop('name')
         config.setdefault('name', name.pop('config_name'))
@@ -266,19 +356,41 @@ def config_info_logic(type=True, **kwargs):
             if not isinstance(params_list, list):
                 return params_list
             config.setdefault('parameters', params_list)
+
+        hooks = config.pop('hooks')
+        if hooks:
+
+            setup_hooks_list = key_value_list('setup_hooks', **hooks)
+            if not isinstance(setup_hooks_list, list):
+                return setup_hooks_list
+            config.setdefault('setup_hooks', setup_hooks_list)
+
+            teardown_hooks_list = key_value_list('teardown_hooks', **hooks)
+            if not isinstance(teardown_hooks_list, list):
+                return teardown_hooks_list
+            config.setdefault('teardown_hooks', teardown_hooks_list)
+
         kwargs.setdefault('config', config)
         return add_config_data(type, **kwargs)
 
 
 def task_logic(**kwargs):
+    """
+    定时任务逻辑处理
+    :param kwargs: dict: 定时任务数据
+    :return:
+    """
+    if 'task' in kwargs.keys():
+        return load_modules(**kwargs.pop('task'))
     if kwargs.get('name') is '':
         return '任务名称不可为空'
     elif kwargs.get('project') is '':
         return '请选择一个项目'
     elif kwargs.get('crontab_time') is '':
         return '定时配置不可为空'
-    elif kwargs.get('module') is '':
+    elif not kwargs.get('module'):
         kwargs.pop('module')
+
     try:
         crontab_time = kwargs.pop('crontab_time').split(' ')
         if len(crontab_time) > 5:
@@ -295,39 +407,159 @@ def task_logic(**kwargs):
     if PeriodicTask.objects.filter(name__exact=kwargs.get('name')).count() > 0:
         return '任务名称重复，请重新命名'
     desc = " ".join(str(i) for i in crontab_time)
-    name = kwargs.pop('name')
+    name = kwargs.get('name')
+
     if 'module' in kwargs.keys():
+        kwargs.pop('project')
         return create_task(name, 'ApiManager.tasks.module_hrun', kwargs, crontab, desc)
     else:
         return create_task(name, 'ApiManager.tasks.project_hrun', kwargs, crontab, desc)
 
 
-'''查询session'''
-
-
 def set_filter_session(request):
-    request.session['user'] = request.POST.get('user', '')
-    request.session['name'] = request.POST.get('name', '')
-    request.session['belong_project'] = request.POST.get('belong_project', '')
-    request.session['belong_module'] = request.POST.get('belong_module', '')
-    request.session['report_name'] = request.POST.get('report_name', '')
+    """
+    update session
+    :param request:
+    :return:
+    """
+    if 'user' in request.POST.keys():
+        request.session['user'] = request.POST.get('user')
+    if 'name' in request.POST.keys():
+        request.session['name'] = request.POST.get('name')
+    if 'belong_project' in request.POST.keys():
+        request.session['belong_project'] = request.POST.get('belong_project')
+    if 'belong_module' in request.POST.keys():
+        request.session['belong_module'] = request.POST.get('belong_module')
+    if 'report_name' in request.POST.keys():
+        request.session['report_name'] = request.POST.get('report_name')
 
-    filter_query = {'user': request.session['user'], 'name': request.session['name'],
-                    'belong_project': request.session['belong_project'],
-                    'belong_module': request.session['belong_module'], 'report_name': request.session['report_name']}
+    filter_query = {
+        'user': request.session['user'],
+        'name': request.session['name'],
+        'belong_project': request.session['belong_project'],
+        'belong_module': request.session['belong_module'],
+        'report_name': request.session['report_name']
+    }
 
     return filter_query
 
 
-'''ajax异步提示'''
+def init_filter_session(request, type=True):
+    """
+    init session
+    :param request:
+    :return:
+    """
+    if type:
+        request.session['user'] = ''
+        request.session['name'] = ''
+        request.session['belong_project'] = ''
+        request.session['belong_module'] = ''
+        request.session['report_name'] = ''
+    else:
+        del request.session['user']
+        del request.session['name']
+        del request.session['belong_project']
+        del request.session['belong_module']
+        del request.session['report_name']
 
 
 def get_ajax_msg(msg, success):
+    """
+    ajax提示信息
+    :param msg: str：msg
+    :param success: str：
+    :return:
+    """
     return success if msg is 'ok' else msg
 
 
-'''注册信息逻辑判断'''
-
-
 def register_info_logic(**kwargs):
+    """
+
+    :param kwargs:
+    :return:
+    """
     return add_register_data(**kwargs)
+
+
+def upload_file_logic(files, project, module, account):
+    """
+    解析yaml或者json用例
+    :param files:
+    :param project:
+    :param module:
+    :param account:
+    :return:
+    """
+
+    for file in files:
+        file_suffix = os.path.splitext(file)[1].lower()
+        if file_suffix == '.json':
+            with io.open(file, encoding='utf-8') as data_file:
+                try:
+                    content = json.load(data_file)
+                except JSONDecodeError:
+                    err_msg = u"JSONDecodeError: JSON file format error: {}".format(file)
+                    logging.error(err_msg)
+
+        elif file_suffix in ['.yaml', '.yml']:
+            with io.open(file, 'r', encoding='utf-8') as stream:
+                content = yaml.load(stream)
+
+        for test_case in content:
+            test_dict = {
+                'project': project,
+                'module': module,
+                'author': account,
+                'include': []
+            }
+            if 'config' in test_case.keys():
+                test_case.get('config')['config_info'] = test_dict
+                add_config_data(type=True, **test_case)
+
+            if 'test' in test_case.keys():  # 忽略config
+                test_case.get('test')['case_info'] = test_dict
+
+                if 'validate' in test_case.get('test').keys():  # 适配validate两种格式
+                    validate = test_case.get('test').pop('validate')
+                    new_validate = []
+                    for check in validate:
+                        if 'comparator' not in check.keys():
+                            for key, value in check.items():
+                                tmp_check = {"check": value[0], "comparator": key, "expected": value[1]}
+                                new_validate.append(tmp_check)
+
+                    test_case.get('test')['validate'] = new_validate
+
+                add_case_data(type=True, **test_case)
+
+
+def get_total_values():
+    total = {
+        'pass': [],
+        'fail': [],
+        'percent': []
+    }
+    today = datetime.date.today()
+    for i in range(-11, 1):
+        begin = today + datetime.timedelta(days=i)
+        end = begin + datetime.timedelta(days=1)
+
+        total_run = TestReports.objects.filter(create_time__range=(begin, end)).aggregate(testRun=Sum('testsRun'))[
+            'testRun']
+        total_success = TestReports.objects.filter(create_time__range=(begin, end)).aggregate(success=Sum('successes'))[
+            'success']
+
+        if not total_run:
+            total_run = 0
+        if not total_success:
+            total_success = 0
+
+        total_percent = round(total_success / total_run * 100, 2) if total_run != 0 else 0.00
+        total['pass'].append(total_success)
+        total['fail'].append(total_run - total_success)
+        total['percent'].append(total_percent)
+
+    return total
+

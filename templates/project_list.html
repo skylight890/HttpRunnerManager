@@ -21,7 +21,7 @@
                                style="font-weight: inherit; font-size: small ">项目名称：</label>
                         <div class="col-sm-9">
                             <input name="project_name" type="text" class="form-control" id="project_name"
-                                   placeholder="项目名称" value="">
+                                   placeholder="项目名称" value="" readonly>
                         </div>
                     </div>
 
@@ -190,7 +190,7 @@
                     <th class="table-type">负责人</th>
                     <th class="table-title">发布应用</th>
                     <th class="table-title">测试人员</th>
-                    <th class="table-title">模块/用例/配置</th>
+                    <th class="table-title">模块/Suite/用例/配置</th>
                     <th class="table-date am-hide-sm-only">创建时间</th>
                     <th width="163px" class="table-set">操作</th>
                 </tr>
@@ -307,13 +307,12 @@
             }
             $('#select_env').modal({
                 relatedTarget: this,
-
                 onConfirm: function () {
                     var data = {
                         "id": $("#project_list").serializeJSON(),
                         "env_name": $('#env_name').val(),
                         "type": type,
-                        'report_name': $('#report_name').val(),
+                        'report_name': $('#report_name').val()
                     };
                     if (mode !== 'batch') {
                         data["id"] = mode;
@@ -346,7 +345,6 @@
                 onCancel: function () {
                 }
             });
-
         }
 
         $('#select_all').click(function () {
