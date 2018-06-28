@@ -117,8 +117,13 @@ class Context(object):
             if level == "testset":
                 self.testset_shared_variables_mapping[variable_name] = variable_eval_value
 
-            self.testcase_variables_mapping[variable_name] = variable_eval_value
-            self.testcase_parser.update_binded_variables(self.testcase_variables_mapping)
+            self.bind_testcase_variable(variable_name, variable_eval_value)
+
+    def bind_testcase_variable(self, variable_name, variable_value):
+        """ bind and update testcase variables mapping
+        """
+        self.testcase_variables_mapping[variable_name] = variable_value
+        self.testcase_parser.update_binded_variables(self.testcase_variables_mapping)
 
     def bind_extracted_variables(self, variables):
         """ bind extracted variables to testset context
@@ -127,8 +132,7 @@ class Context(object):
         """
         for variable_name, value in variables.items():
             self.testset_shared_variables_mapping[variable_name] = value
-            self.testcase_variables_mapping[variable_name] = value
-            self.testcase_parser.update_binded_variables(self.testcase_variables_mapping)
+            self.bind_testcase_variable(variable_name, value)
 
     def __update_context_functions_config(self, level, config_mapping):
         """
@@ -198,7 +202,7 @@ class Context(object):
                 check_value = resp_obj.extract_field(check_item)
             except exception.ParseResponseError:
                 msg = "failed to extract check item from response!\n"
-                msg += "response: {}".format(resp_obj.resp_text)
+                msg += "response content: {}".format(resp_obj.content)
                 raise exception.ParseResponseError(msg)
 
         validator["check_value"] = check_value
@@ -213,6 +217,7 @@ class Context(object):
     def do_validation(self, validator_dict):
         """ validate with functions
         """
+        # TODO: move comparator uniform to init_task_suite
         comparator = utils.get_uniform_comparator(validator_dict["comparator"])
         validate_func = self.testcase_parser.get_bind_function(comparator)
 
