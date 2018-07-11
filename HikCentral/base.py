@@ -30,10 +30,10 @@ class Connect:
     ==============================================================================================="""
 
     def __init__(self):
-        # lib_dir = g_rootPath + "\\Lib"
-        # os.chdir(lib_dir)
-        self.dll = ctypes.CDLL(".\\ISAPITest.dll")
-        # os.chdir(g_rootPath)
+        lib_dir = g_rootPath + "\\Lib"
+        os.chdir(lib_dir)
+        self.dll = ctypes.CDLL("ISAPITest.dll")
+        os.chdir(g_rootPath)
         self.dll.Init()
         self.login_id = 0
         # 统计每条协议耗时
@@ -62,14 +62,16 @@ class Connect:
     ==============================================================================================="""
 
     def login(self, ip, port, user, pwd, clientType=0, httpType=0):
-        self.login_id = self.dll.Login(ip, port, user, pwd, clientType, 'http' if httpType == 0 else 'https');
+        self.login_id = self.dll.Login(ip, port, user, pwd, clientType, 'http' if httpType == 0 else 'https')
         if (self.login_id != -1):
             error_info = '=============== [Login Success] ===============\r'
+            print(error_info)
             g_logRecord.log_info(error_info)
         else:
             error_info = '=============== [Login Fail] ip: %s, port: %s, username: %s, pwd: %s, client type: %s ===============\r' % (
             ip, str(port), user, pwd, str(clientType))
-            g_logRecord.log_error(error_info)
+            # g_logRecord.log_error(error_info)
+            print(error_info)
 
         return self.login_id
 
@@ -84,7 +86,7 @@ class Connect:
         self.dll.LogOut(self.login_id)
 
         # 记录日志
-        g_logRecord.log_info('=============== [Logout] ===============\r')
+        # g_logRecord.log_info('=============== [Logout] ===============\r')
         print('=============== [Logout] ===============\r')
 
     """============================================================================================
@@ -177,7 +179,12 @@ class TestGroup:
 
     def __init__(self, serverType='VSM_Server'):
         # 获取登录对应服务器的参数
-        (self.ip, self.port, self.username, self.loginPw, self.clientType) = g_login_params_dict[serverType]
+        # (self.ip, self.port, self.username, self.loginPw, self.clientType) = g_login_params_dict[serverType]
+        self.ip = "10.18.69.222"
+        self.port = 80
+        self.username = "admin"
+        self.loginPw = "Abc12345"
+        self.clientType = 0
         # 定义通讯对象
         self.conn = Connect()
         # 定义测试结果

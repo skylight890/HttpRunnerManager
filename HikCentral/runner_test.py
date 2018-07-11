@@ -1,8 +1,9 @@
 # encoding: utf-8
 
 import sys
-from .base import *
-from .logger import *
+
+from HikCentral.base import *
+from HikCentral.logger import *
 from HikCentral import exception
 
 log = LogRecord()
@@ -11,7 +12,7 @@ class runner(object):
     def __init__(self):
         self.test_group = TestGroup()
 
-        if self.test_group.logoutVsm() == -1:
+        if self.test_group.loginVsm() == -1:
             log.log_error('Failed to login!')
             print('Failed to login')
             sys.exit()
@@ -27,19 +28,21 @@ class runner(object):
                     "url": "url",
                     "method": "POST",
                     "template": "template",
-                    "data": "data",
+                    "data": [],
                 },
                 "variable": {
                     "var1": "$var1",
                     "var2": "var2",
                 },
-                "extract": "extract",
+                "extractor":[
+                    {"ID": "Data.AreaList.Area.ID"},
+                ],
                 "validator":[
                     {
                         "check": "expect",
                         "comparator": "comparator",
-                        "expect“: "expect"
-                    }
+                        "expect": "expect"
+                    },
                 ],
                 "teardown_hook": "teardown_hook",
             }
@@ -52,10 +55,47 @@ class runner(object):
         try:
             url = testcase.pop('url')
             method = testcase.pop('method')
-            group_name = testcase.pop("group", None)
+            # testcase_name = testcase.pop('name')
+            template = testcase.pop("template", None)
+            data = testcase.pop("data", None)
+            print('running testcase...')
+            print(url + method + template + str(data))
+
+            response = self.test_group.sendRequest(0, url, method, '', 1, template, data, {}, {}, {})
+
         except KeyError:
             raise exception.ParamsError("URL or METHOD missed!")
 
 
     def parse_testcase(self, testcase):
         request = testcase.get('request', None)
+        return request
+
+
+if __name__== '__main__':
+    testcase = {
+        "name": "testcase_name_test",
+        "setup_hook": "setup",
+        "request": {
+            "url": "/ISAPI/Bumblebee/System/SystemProperties",
+            "method": "PUT",
+            "template": "test",
+            "data": ['VSM1_FrameTest'],
+        },
+        "variable": {
+            "var1": "$var1",
+            "var2": "var2",
+        },
+        "extract": "extract",
+        "validator": [
+            {
+                "check": "expect",
+                "comparator": "comparator",
+                "expect": "expect",
+            },
+        ],
+        "teardown_hook": "teardown_hook",
+    }
+
+    runner = runner()
+    runner.run_test(testcase)

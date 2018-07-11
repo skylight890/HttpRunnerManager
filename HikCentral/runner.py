@@ -137,7 +137,10 @@ class Runner(object):
                     },
                     "body": '{"name": "user", "password": "123456"}'
                 },
-                "extract": [],              # optional
+                "extract": [
+                    {"error_code": "errorcode"},
+                    {"ID": "Data.AreaList.Area.ID"},
+                ],              # optional
                 "validate": [],             # optional
                 "setup_hooks": [],          # optional
                 "teardown_hooks": []        # optional

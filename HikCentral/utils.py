@@ -231,18 +231,18 @@ class LogRecord:
 
 
 # 定义日志全局变量
-g_logType = ''.join(IniFileParser().getConfigInformation('LogSetting', ['logRecordType']))
+#g_logType = ''.join(IniFileParser().getConfigInformation('LogSetting', ['logRecordType']))
 g_logRecord = LogRecord()
 # 错误码xml文档解析对象
-error_xml_parse = XmlReader(g_rootPath + u'\\Doc\\协议文档\\ErrorCode.xml')
+# error_xml_parse = XmlReader(g_rootPath + u'\\Doc\\协议文档\\ErrorCode.xml')
 
 # 获取登录参数(配置文件只读一次)
-g_login_params_dict = IniFileParser().get_config_params_dict(
-    ['VSM_Server', 'RSM_Server', 'Control_Client', 'VSM_Control_Client'],
-    ['ip', 'port', 'username', 'password', 'clientType'])
-g_login_db_params_dict = IniFileParser().get_config_params_dict(['VSM_DB', 'RSM_DB'],
-                                                                ['db_name', 'db_ip', 'db_port', 'db_username',
-                                                                 'db_password'])
+# g_login_params_dict = IniFileParser().get_config_params_dict(
+#     ['VSM_Server', 'RSM_Server', 'Control_Client', 'VSM_Control_Client'],
+#     ['ip', 'port', 'username', 'password', 'clientType'])
+# g_login_db_params_dict = IniFileParser().get_config_params_dict(['VSM_DB', 'RSM_DB'],
+#                                                                 ['db_name', 'db_ip', 'db_port', 'db_username',
+#                                                                  'db_password'])
 
 
 # XML简单解析类
@@ -627,17 +627,16 @@ class XmlVerify:
             self.actualRespXmlParser.getXmlDataAfterIndent())
 
         # 日志记录控制
-        if g_logType == '0':
-            g_logRecord.writeText2Log(strReqXmlData + strActualRespXmlData)
-        else:
-            if bResult == False:
-                g_logRecord.writeText2Log(strReqXmlData + strActualRespXmlData)
-            else:
-                pass
+        # if g_logType == '0':
+        #     g_logRecord.writeText2Log(strReqXmlData + strActualRespXmlData)
+        # else:
+        #     if bResult == False:
+        #         g_logRecord.writeText2Log(strReqXmlData + strActualRespXmlData)
+        #     else:
+        #         pass
 
         # 打印发送请求数据
-        print
-        '{%s,%s,%s}' % (verify_status, protocalInfo, '' if bResult else '\r%s' % (self.strFailReason))
+        print('{%s,%s,%s}' % (verify_status, protocalInfo, '' if bResult else '\r%s' % (self.strFailReason)))
 
     """============================================================================================
     函数名称: compare_response_xml
@@ -700,10 +699,10 @@ class XmlVerify:
         else:
             self.bResult = False
             # 提取错误详情
-            (em_desc, ec_desc) = error_xml_parse.get_desc_by_xpath('ErrorModule/Module', errModule, errCode)
-            self.strFailReason = ('    [Expect]: ErrorCode=0; ErrorModule=0') + '\r' + \
-                                 ('    [Actual]: ErrorCode=%s(%s); ErrorModule=%s(%s)') % (
-                                 errCode, ec_desc, errModule, em_desc)
+            # (em_desc, ec_desc) = error_xml_parse.get_desc_by_xpath('ErrorModule/Module', errModule, errCode)
+            # self.strFailReason = ('    [Expect]: ErrorCode=0; ErrorModule=0') + '\r' + \
+            #                      ('    [Actual]: ErrorCode=%s(%s); ErrorModule=%s(%s)') % (
+            #                      errCode, ec_desc, errModule, em_desc)
 
         # 记录发送与接收详细数据到日志文件log.txt
         self.log2File(protocalInfo, self.bResult)

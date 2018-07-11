@@ -122,7 +122,9 @@ class XmlReader:
             
             # 返回数据
             s = ET.tostring(root, encoding="utf-8", method="xml")
+            s = s.decode(encoding='utf-8')
             s = s.replace('\n','').replace('\r','').replace(' ','').replace('\t','') #替换换行、空白等字符
+            s = s.encode(encoding='utf-8')
             return (s, self.param_list)
     
     """=========================================================
